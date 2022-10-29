@@ -36,11 +36,26 @@ import { ECartGoodsStatus, EActivityCategory } from './components/utils/const';
 // requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]  => requirePlatform('xxxx').xxx;
 
 
+
+/(const|var|let)(([\s]+\{[\s]+))(([,$\w_\{\}\s\n:]*utils[,$:\w_\{\}\s\n]*))([\s]+\}[\s]+\=[\s]+)requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]/g
+/(const|var|let)(([\s]+{[s]+))(([,$w_{}s\n:]*utils[,$:w_{}s\n]*))([s]+}[s]+=[s]+)requirePlatform(['"]([w]+)['"]).([w]+)[;s]/g
  * 
  */
 
-// const
+/**
+    /
+        (const|var|let)
+        ([\s]+\{[\s]+)
+        (
+            ([\w]+,)?
+            ([\w]+(,|(:\{\s[\w]+\s\},?)))*
 
+            [,$\w_\{\}\s\n:]*utils[,$:\w_\{\}\s\n]*
+        )
+        ([\s]+\}[\s]+\=[\s]+)
+        requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]/g
+
+ */
 
 
 // 跳转到定义
@@ -49,10 +64,12 @@ function provideDefinition (document, position) {
     // const workDir = path.dirname(fileName);
     const word = document.getText(document.getWordRangeAtPosition(position));
     const documentText = document.getText();
-    const line = document.lineAt(position);
+    // const line = document.lineAt(position);
     // const projectPath = getProjectPath(document); 
     console.log('====== 进入 provideDefinition 方法 ======');
-    // const reg = /^(const|var|let).(=.requirePlatform)/
+    const reg = new RegExp(`(const|var|let)(([\\s]+\\{[\\s]+))(([,$\\w_\\{\\}\\s\\n:]*${word}[,$:\\w_\\{\\}\\s\\n]*))([\\s]+\\}[\\s]+\\=[\\s]+)requirePlatform\\([\\'\\"]([\\w]+)[\\'\\"]\\)\\.([\\w]+)[;\\s]`)
+    const result = documentText.match(reg);
+    console.log('result: ', result);
 }
 
 module.exports = vscode.languages.registerDefinitionProvider(['javascript'], { provideDefinition })
