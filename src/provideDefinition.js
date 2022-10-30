@@ -4,7 +4,7 @@ const fs = require('fs');
 const { getProjectPath } = require('./utils')
 
 // 匹配requirePlatform引入规则
-const reg = /(?<=(const(.)\{))([\S\s])*(?=(\}(.)\=(.)requirePlatform))/g
+const reg = /(const|var|let)(([\s]+\{[\s]+))(([,$\w_\{\}\s\n:]*utils[,$:\w_\{\}\s\n]*))([\s]+\}[\s]+\=[\s]+)requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]/g
 
 // /(const|var|let)(([\s]+\{[\s]+))(([,$\w_\{\}\s\n:]*utils[,$:\w_\{\}\s\n]*))([\s]+\}[\s]+\=[\s]+)requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]/g
 
@@ -24,21 +24,28 @@ const {
 const { CMS: cmsSdk } = requirePlatform('cms').main;
 import { ECartGoodsStatus, EActivityCategory } from './components/utils/const';
 
+[\s,]?][\w]+[]
 
-// const|var|let => 开始值
-// ([\s]+\{[\s]+) => 空格栏目
+
+// 声明符 => const|var|let
+// 空格栏目 => ([\s]+\{[\s]+) 
 
 // 
- [,$\w_\{\}\s\n:]*
+1. XXX,             =>  [$_\w]+[,:\s]*
+2. XXX: xxx,        =>  [$_\w]+:\s+[$_\w]+[,\s]
+3. xxx: { aaa }     =>  [$_\w]+:\s+\{\s+\s\}[,\s]
+
+/(\b(\w+):\s)?({(\s[\w]+[\s,]?)+})/
+
 // 
 
-// ([\s]+\}[\s]+\=[\s]+) => 空格栏
-// requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]  => requirePlatform('xxxx').xxx;
+// 空格栏 => ([\s]+\}[\s]+\=[\s]+)
+// 结尾 requirePlatform('xxxx').xxx; => requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]
 
 
 
 /(const|var|let)(([\s]+\{[\s]+))(([,$\w_\{\}\s\n:]*utils[,$:\w_\{\}\s\n]*))([\s]+\}[\s]+\=[\s]+)requirePlatform\([\'\"]([\w]+)[\'\"]\)\.([\w]+)[;\s]/g
-/(const|var|let)(([\s]+{[s]+))(([,$w_{}s\n:]*utils[,$:w_{}s\n]*))([s]+}[s]+=[s]+)requirePlatform(['"]([w]+)['"]).([w]+)[;s]/g
+/(const|var|let)(([\s]+{[s]+))(([,$w_{}s\n:]*utils[,$:w_{}s\n]*))([s]+}[s]+=[s]+)requirePlatform(['"]([w]+)['"]).([w]+)[;\s]/g
  * 
  */
 
@@ -69,7 +76,10 @@ function provideDefinition (document, position) {
     console.log('====== 进入 provideDefinition 方法 ======');
     const reg = new RegExp(`(const|var|let)(([\\s]+\\{[\\s]+))(([,$\\w_\\{\\}\\s\\n:]*${word}[,$:\\w_\\{\\}\\s\\n]*))([\\s]+\\}[\\s]+\\=[\\s]+)requirePlatform\\([\\'\\"]([\\w]+)[\\'\\"]\\)\\.([\\w]+)[;\\s]`)
     const result = documentText.match(reg);
-    console.log('result: ', result);
+    // 匹配到结果，进行跳转
+    if (result) {
+        console.log('result: ', result);
+    }
 }
 
 module.exports = vscode.languages.registerDefinitionProvider(['javascript'], { provideDefinition })
