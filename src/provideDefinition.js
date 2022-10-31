@@ -72,14 +72,21 @@ function provideDefinition (document, position) {
     const word = document.getText(document.getWordRangeAtPosition(position));
     const documentText = document.getText();
     // const line = document.lineAt(position);
-    // const projectPath = getProjectPath(document); 
+    const projectPath = getProjectPath(document); 
     console.log('====== 进入 provideDefinition 方法 ======');
     const reg = new RegExp(`(const|var|let)(([\\s]+\\{[\\s]+))(([,$\\w_\\{\\}\\s\\n:]*${word}[,$:\\w_\\{\\}\\s\\n]*))([\\s]+\\}[\\s]+\\=[\\s]+)requirePlatform\\([\\'\\"]([\\w]+)[\\'\\"]\\)\\.([\\w]+)[;\\s]`)
     const result = documentText.match(reg);
     // 匹配到结果，进行跳转
     if (result) {
-        console.log('result: ', result);
+        const platformName = result[result.length - 2];
+        const packageName = result[result.length - 1];
+        const destPath = `${projectPath}/platforms/${platformName}/${packageName}/index.ts`;
+        if (fs.existsSync(destPath)) {
+            return new vscode.Location(vscode.Uri.file(destPath), new vscode.Position(0, 0));
+        }
     }
 }
+
+// Activating extension 'crazyurus.miniprogram-vscode-extension' failed: Instrumentation key not found, pass the key in the config to this method or set the key in the environment variable APPINSIGHTS_INSTRUMENTATIONKEY before starting the server.
 
 module.exports = vscode.languages.registerDefinitionProvider(['javascript'], { provideDefinition })
