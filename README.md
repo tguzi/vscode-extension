@@ -1,6 +1,6 @@
 # titanext README
 
-This is the README for your extension "titanext". After writing up a brief description, we recommend including the following sections.
+"titanext". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
